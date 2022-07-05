@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useDebouncedCallback } from 'use-debounce'
 import './Company.css'
+import { useCompanies } from '../../store'
 
 const Employee = ({ employee }) => {
   return (
@@ -16,46 +17,39 @@ const Employee = ({ employee }) => {
 
 const Company = () => {
   const { companyId } = useParams()
-  const [company, setCompany] = useState()
+  const { companies, fetchCompanyDetails, updateCompanyName, saveCompany } = useCompanies()
+  const company = companies[companyId]
   const [selectedDept, setSelectedDept] = useState()
+  const isCompanyFetched = !!company?.departments
 
   const saveCompanyName = useDebouncedCallback(name => {
-    fetch('/companies', {
-      method: 'PATCH',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name,
-        companyId,
-      })
-    })
+    saveCompany(companyId, name)
   }, 500)
 
   useEffect(() => {
-    async function fetchCompany() {
-      const res = await fetch(`/companies/${companyId}`)
-      const { message, data } = await res.json()
-      if (message === 'success') {
-        setCompany(data)
-        const depts = Object.keys(data.departments)
-        if (depts.length) {
-          setSelectedDept(data.departments[depts[0]])
-        }
+    if (companyId && !isCompanyFetched) {
+      fetchCompanyDetails(companyId)
+    }
+  }, [companyId, fetchCompanyDetails, isCompanyFetched])
+
+  useEffect(() => {
+    if (!selectedDept && isCompanyFetched) {
+      const depts = Object.keys(company.departments)
+      if (depts.length) {
+        setSelectedDept(company.departments[depts[0]])
+      } else {
+        setSelectedDept({})
       }
     }
-
-    fetchCompany()
-  }, [companyId])
+  }, [selectedDept, company.departments, isCompanyFetched])
 
   const onCompanyNameChanged = e => {
     const name = e.target.value
-    setCompany(prev => ({ ...prev, name }))
+    updateCompanyName(companyId, name)
     saveCompanyName(name)
   }
 
-  if (!company) {
+  if (!isCompanyFetched) {
     return (<div>Loading...</div>)
   }
 
@@ -79,7 +73,7 @@ const Company = () => {
               <option key={dept.id} value={dept.id}>{dept.name} ({dept.employees.length})</option>
             ))}
           </select>
-          {selectedDept && (
+          {selectedDept?.employees && (
             <ul className="company_employees">
               {selectedDept.employees.map(e => <Employee key={e.id} employee={e} />)}
             </ul>

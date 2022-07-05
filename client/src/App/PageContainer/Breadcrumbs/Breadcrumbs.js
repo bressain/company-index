@@ -1,22 +1,25 @@
 import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useParams } from 'react-router-dom'
 import './Breadcrumbs.css';
+import { useCompanies } from '../../../store'
 
 const Breadcrumbs = () => {
 	const location = useLocation();
+	const { companyId } = useParams();
+	const companies = useCompanies(state => state.companies)
 
 	const crumbs = [];
 
-	switch (location.pathname) {
-		case '/':
-		case '/companies':
-			crumbs.push({
-				name: 'Companies',
-				destination: '/companies',
-			});
-			break;
-		default:
-			break;
+	if (location.pathname === '/' || location.pathname.startsWith('/companies')) {
+		crumbs.push({ name: 'Companies', destination: '/companies' })
+	}
+	if (companyId) {
+		const company = companies[companyId]
+		if (company) {
+			crumbs.push({ name: company.name, destination: `/companies/${companyId}` })
+		} else {
+			crumbs.push({ name: 'Loading...', destination: `/companies/${companyId}` })
+		}
 	}
 
 	return (

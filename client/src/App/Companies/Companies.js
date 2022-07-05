@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import './Companies.css';
+import { useCompanies } from '../../store'
 
 const TableRow = ({
 	className,
@@ -18,19 +19,14 @@ const TableRow = ({
 );
 
 const Companies = () => {
-	const [companies, setCompanies] = useState([]);
+	const { companies, fetchCompanies, isCompaniesFetched } = useCompanies()
 
 	// fetch the company data from the backend
 	useEffect(() => {
-		async function getCompanies() {
-			const response = await fetch('/companies');
-			const { message, data } = await response.json();
-			if (message === 'success') {
-				setCompanies(data);
-			}
+		if (!isCompaniesFetched) {
+			fetchCompanies()
 		}
-		getCompanies();
-	}, []);
+	}, [fetchCompanies, isCompaniesFetched]);
 
 	return (
 		<div className="companies">
@@ -41,7 +37,7 @@ const Companies = () => {
 				region="Region"
 				industry="Industry"
 			/>
-			{companies.map(company => (
+			{Object.values(companies).map(company => (
 				<Link
 					className="companies_row_container"
 					key={company.id}
