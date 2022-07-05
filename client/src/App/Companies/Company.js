@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useDebouncedCallback } from 'use-debounce'
 import './Company.css'
 
 const Employee = ({ employee }) => {
@@ -18,6 +19,20 @@ const Company = () => {
   const [company, setCompany] = useState()
   const [selectedDept, setSelectedDept] = useState()
 
+  const saveCompanyName = useDebouncedCallback(name => {
+    fetch('/companies', {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        companyId,
+      })
+    })
+  }, 500)
+
   useEffect(() => {
     async function fetchCompany() {
       const res = await fetch(`/companies/${companyId}`)
@@ -34,6 +49,12 @@ const Company = () => {
     fetchCompany()
   }, [companyId])
 
+  const onCompanyNameChanged = e => {
+    const name = e.target.value
+    setCompany(prev => ({ ...prev, name }))
+    saveCompanyName(name)
+  }
+
   if (!company) {
     return (<div>Loading...</div>)
   }
@@ -42,7 +63,9 @@ const Company = () => {
     <div className="company">
       <dl>
         <dt>Name:</dt>
-        <dd>{company.name}</dd>
+        <dd>
+          <input value={company.name} onChange={onCompanyNameChanged} />
+        </dd>
         <dt>Segment</dt>
         <dd>{company.segment}</dd>
         <dt>Region</dt>

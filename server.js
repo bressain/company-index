@@ -1,5 +1,7 @@
 const express = require('express');
+const bodyParser = require('body-parser')
 const app = express();
+app.use(bodyParser.json())
 const port = 8080;
 const db = require('./db');
 
@@ -86,6 +88,28 @@ function serializeCompany(companyData) {
 		}, {})
 	}
 }
+
+app.patch('/companies', (req, res) => {
+	if (!req.body.name || !req.body.companyId) {
+		res.status(400).json({ error: 'Invalid request' })
+		return
+	}
+
+	const statement = `
+		UPDATE companies SET name = $name WHERE id = $companyId;
+	`
+	const params = {
+		$name: req.body.name,
+		$companyId: req.body.companyId
+	}
+	db.run(statement, params, err => {
+		if (err) {
+			res.status(400).json({ error: err })
+		} else {
+			res.status(200)
+		}
+	})
+})
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`)
