@@ -1,0 +1,28 @@
+.company dt {
+  font-weight: bold;
+  font-size: 0.85em;
+  line-height: 1rem;
+}
+.company dd {
+  margin: 0 0 16px;
+}
+.company select {
+  margin-bottom: 16px;
+}
+
+.company_employees {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  width: 70%;
+  overflow-x: auto;
+  column-gap: 16px;
+}
+.company_employees-subitem {
+  font-size: 0.85em;
+}
+.company_employees img {
+  height: 100px;
+  width: 100px;
+}

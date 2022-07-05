@@ -15,6 +15,10 @@
 	top: 0;
 }
 
+.companies_row_container {
+	text-decoration: none;
+	color: inherit;
+}
 .companies_row {
 	display: flex;
 	flex-direction: row;

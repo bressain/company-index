@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'
 import './Companies.css';
 
 const TableRow = ({
 	className,
-	onClick,
 	name,
 	segment,
 	region,
 	industry,
 }) => (
-	<div className={className} onClick={onClick}>
+	<div className={className}>
 		<div className="companies_row-cell">{name}</div>
 		<div className="companies_row-cell">{segment}</div>
 		<div className="companies_row-cell">{region}</div>
@@ -42,12 +42,16 @@ const Companies = () => {
 				industry="Industry"
 			/>
 			{companies.map(company => (
-				<TableRow
+				<Link
+					className="companies_row_container"
 					key={company.id}
-					className="companies_row"
-					onClick={() => console.log(`navigate to company page for ${company.name}`)}
-					{...company}
-				/>
+					to={`/companies/${company.id}`}
+				>
+					<TableRow
+						className="companies_row"
+						{...company}
+					/>
+				</Link>
 			))}
 		</div>
 	);
